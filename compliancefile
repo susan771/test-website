@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Compliance Test Site • GDPR • CCPA/CPRA • DAA</title>
+  <style>
+    :root{
+      --bg:#0f172a;--panel:#111827;--ink:#e5e7eb;--muted:#9ca3af;--brand:#22c55e;--warn:#f59e0b;--danger:#ef4444;--ok:#10b981;
+      --chip:#1f2937;--card:#0b1220;--link:#60a5fa
+    }
+    html,body{height:100%}
+    body{margin:0;font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Helvetica,Arial,sans-serif;background:linear-gradient(180deg,#0b1020,#0c1326);color:var(--ink)}
+    header{padding:28px 22px;border-bottom:1px solid #1f2937;display:flex;align-items:center;justify-content:space-between;background:rgba(0,0,0,.2);backdrop-filter:blur(6px);position:sticky;top:0;z-index:5}
+    header h1{margin:0;font-size:20px;letter-spacing:.3px}
+    header .badges{display:flex;gap:8px}
+    .badge{background:var(--chip);color:var(--muted);padding:6px 10px;border-radius:999px;border:1px solid #263041;font-size:12px}
+    main{max-width:1100px;margin:34px auto;padding:0 18px;display:grid;grid-template-columns:1.2fr .8fr;gap:18px}
+    .card{background:rgba(255,255,255,.02);border:1px solid #1f2937;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+    .card h2{margin:0;padding:16px 16px 0;font-size:18px}
+    .card .body{padding:14px 16px 18px}
+    .grid{display:grid;gap:12px}
+    .kvs{display:grid;grid-template-columns:200px 1fr;gap:6px 12px}
+    .kvs div{padding:6px 10px;background:#0a0f1e;border:1px solid #1c2740;border-radius:8px}
+    .muted{color:var(--muted)}
+    table{width:100%;border-collapse:collapse;font-size:14px}
+    th,td{border-bottom:1px solid #1f2937;padding:8px 10px;text-align:left}
+    code,pre{background:#0a0f1e;border:1px solid #1c2740;border-radius:8px;padding:8px 10px;color:#cbd5e1}
+    pre{overflow:auto}
+    .row{display:flex;gap:8px;flex-wrap:wrap}
+    .btn{appearance:none;border:none;border-radius:10px;padding:10px 14px;background:var(--chip);color:var(--ink);cursor:pointer;border:1px solid #263041}
+    .btn.primary{background:var(--brand);color:#052e16;border-color:#14532d}
+    .btn.warn{background:var(--warn);color:#1f2937;border-color:#9a6a07}
+    .btn.danger{background:var(--danger);color:#fff;border-color:#7f1d1d}
+    .btn.link{background:transparent;border:0;color:var(--link);padding:0}
+    .switch{display:flex;align-items:center;gap:10px}
+    .switch input{width:40px;height:22px}
+    .banner{position:fixed;inset:auto 0 0 0;background:rgba(11,16,32,.98);border-top:1px solid #1f2937;box-shadow:0 -8px 40px rgba(0,0,0,.4);padding:16px 18px;z-index:10}
+    .banner h3{margin:0 0 8px;font-size:16px}
+    .flex{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+    .banner .col{flex:1 1 320px}
+    .pill{background:#0a0f1e;border:1px solid #1c2740;border-radius:999px;padding:6px 10px;font-size:12px;color:var(--muted)}
+    .tag{display:inline-block;margin-right:6px}
+    footer{padding:28px 18px;text-align:center;color:var(--muted)}
+    .ok{color:var(--ok)}
+    .warnc{color:var(--warn)}
+    .dangerc{color:var(--danger)}
+    a{color:var(--link)}
+  </style>
+</head>
+<body>
+<header>
+  <h1>Compliance Test Site · Cookies & Consent</h1>
+  <div class="badges">
+    <span class="badge">GDPR</span>
+    <span class="badge">CCPA/CPRA</span>
+    <span class="badge">DAA (AdChoices)</span>
+  </div>
+</header>
+
+<main>
+  <!-- LEFT: Demo content + controls -->
+  <section class="card">
+    <h2>Demo Content (sets different data)</h2>
+    <div class="body grid">
+      <div class="kvs">
+        <div>Visitor ID (1st‑party)</div>
+        <div><code id="visitorId">—</code></div>
+        <div>Cart (sessionStorage)</div>
+        <div><code id="cart">—</code></div>
+        <div>Prefs (localStorage)</div>
+        <div><code id="prefs">—</code></div>
+        <div>GPC detected</div>
+        <div><code id="gpc">—</code></div>
+        <div>DNT detected</div>
+        <div><code id="dnt">—</code></div>
+      </div>
+
+      <div class="row">
+        <button class="btn" id="addToCart">Add item to Cart</button>
+        <button class="btn" id="savePrefs">Save Preferences</button>
+        <button class="btn warn" id="simulatePurchase">Simulate Purchase</button>
+      </div>
+
+      <p class="muted">Actions above will write <em>necessary</em> data (e.g., cart) regardless of consent, but any <strong>analytics</strong> or <strong>marketing</strong> data below will only write when the corresponding consent is granted.</p>
+
+      <div class="row">
+        <button class="btn" id="fireAnalytics">Fire Analytics Event</button>
+        <button class="btn" id="setMktCookie">Set Marketing Cookie</button>
+        <button class="btn" id="loadAdPixel">Load Ad Pixel (simulated)</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- RIGHT: Current cookies & signals -->
+  <section class="card">
+    <h2>Current Cookies & Storage</h2>
+    <div class="body grid">
+      <div class="row">
+        <button class="btn" id="refreshTables">Refresh</button>
+        <button class="btn danger" id="clearAll">Clear ALL (cookies + storage)</button>
+      </div>
+      <h3>Cookies</h3>
+      <table id="cookieTable">
+        <thead><tr><th>Name</th><th>Value</th><th>Category</th><th>Domain</th><th>Expires</th></tr></thead>
+        <tbody></tbody>
+      </table>
+
+      <h3>Web Storage</h3>
+      <table id="storageTable">
+        <thead><tr><th>Type</th><th>Key</th><th>Value</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- LEFT: Consent center -->
+  <section class="card">
+    <h2>Consent Center</h2>
+    <div class="body grid">
+      <div class="switch"><input type="checkbox" id="cNecessary" checked disabled><label for="cNecessary">Necessary (Always On)</label></div>
+      <div class="switch"><input type="checkbox" id="cPrefs"><label for="cPrefs">Preferences</label></div>
+      <div class="switch"><input type="checkbox" id="cAnalytics"><label for="cAnalytics">Analytics</label></div>
+      <div class="switch"><input type="checkbox" id="cMarketing"><label for="cMarketing">Marketing</label></div>
+
+      <div class="row">
+        <button class="btn" id="acceptAll">Accept All</button>
+        <button class="btn" id="rejectAll">Reject All</button>
+        <button class="btn primary" id="saveChoices">Save Choices</button>
+      </div>
+
+      <div>
+        <div class="pill tag">Consent Version: <span id="consentVersion">1.0.0</span></div>
+        <div class="pill tag">Last Updated: <span id="consentUpdated">—</span></div>
+        <div class="pill tag">Region: <span id="region">Unknown</span></div>
+      </div>
+
+      <details>
+        <summary>View consent record JSON</summary>
+        <pre id="consentJSON">{}</pre>
+      </details>
+
+      <div class="row">
+        <button class="btn link" id="dnsmpi">Do Not Sell or Share My Personal Information</button>
+        <a class="btn link" href="https://youradchoices.com/choices" target="_blank" rel="noopener noreferrer">DAA AdChoices</a>
+        <button class="btn link" id="exportConsent">Export consent.json</button>
+      </div>
+      <p class="muted">“Do Not Sell or Share” will disable marketing, remove marketing cookies, and store a CPRA opt‑out signal.</p>
+    </div>
+  </section>
+
+  <!-- RIGHT: Signals & notices -->
+  <section class="card">
+    <h2>Signals & Notices</h2>
+    <div class="body grid">
+      <ul>
+        <li>Global Privacy Control (GPC): <strong id="gpcState">—</strong></li>
+        <li>Do Not Track (DNT): <strong id="dntState">—</strong></li>
+        <li>Consent required for analytics/marketing in EEA/UK/BR/CA: <strong id="reqState">—</strong></li>
+      </ul>
+      <p class="muted">This page auto‑rejects non‑essential categories if GPC or DNT is detected. You can still allow them explicitly.</p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <small>Sample site for validating consent behavior. No real tracking or ad requests are sent.</small>
+</footer>
+
+<!-- Consent Banner -->
+<div class="banner" id="banner" hidden>
+  <div class="flex">
+    <div class="col">
+      <h3>We use cookies</h3>
+      <p class="muted">We use necessary cookies to make this site work. We also use preferences, analytics, and marketing cookies with your consent. See our <a href="#" id="openCenter">Consent Center</a>.</p>
+      <div class="muted">
+        <span class="pill">GDPR</span>
+        <span class="pill">CCPA/CPRA</span>
+        <span class="pill">DAA</span>
+      </div>
+    </div>
+    <div class="col">
+      <div class="row">
+        <button class="btn" id="bannerReject">Reject Non‑Essential</button>
+        <button class="btn primary" id="bannerAccept">Accept All</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  /* ----------------------- Utilities ----------------------- */
+  const $ = (sel) => document.querySelector(sel);
+  const nowISO = () => new Date().toISOString();
+  const DAYS = 86400;
+  const consentKey = 'consent.record.v1';
+  const regionKey = 'consent.region';
+  const cpraKey = 'cpra.do_not_sell';
+
+  function setCookie(name,value, {days=365, path='/', sameSite='Lax', secure=false, domain}={}){
+    let exp = new Date(Date.now()+days*DAYS*1000).toUTCString();
+    document.cookie = `${name}=${encodeURIComponent(value)}; Expires=${exp}; Path=${path}; SameSite=${sameSite}${secure?'; Secure':''}${domain?`; Domain=${domain}`:''}`;
+  }
+  function delCookie(name){
+    document.cookie = `${name}=; Max-Age=0; Path=/`; // domain-scoped deletion is simplified for demo
+  }
+  function getCookies(){
+    return document.cookie.split('; ').filter(Boolean).map(p=>{
+      const [k,...rest]=p.split('=');
+      return {name:k,value:decodeURIComponent(rest.join('='))}
+    });
+  }
+  function saveFile(filename, text){
+    const blob = new Blob([text], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  /* ------------- Region & Signals (very naive demo) ------------- */
+  const gpc = navigator.globalPrivacyControl === true;
+  const dnt = (navigator.doNotTrack === '1' || window.doNotTrack === '1');
+  let region = localStorage.getItem(regionKey) || 'Unknown';
+  // For testing, you can set ?region=EEA or ?region=US-CA etc.
+  const params = new URLSearchParams(location.search);
+  if(params.get('region')){ region = params.get('region'); localStorage.setItem(regionKey, region); }
+
+  /* ----------------------- Consent Model ----------------------- */
+  const defaultConsent = {
+    version: '1.0.0',
+    updatedAt: null,
+    region,
+    gpc,
+    dnt,
+    categories: { necessary:true, prefs:false, analytics:false, marketing:false },
+    cpra: { doNotSell: false },
+    meta: { source: 'banner', recordId: crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2) }
+  };
+
+  function loadConsent(){
+    const stored = localStorage.getItem(consentKey);
+    if(stored) return JSON.parse(stored);
+    // If GPC/DNT present, start rejected by default for non-necessary
+    const base = structuredClone(defaultConsent);
+    if(gpc || dnt){ base.categories.prefs = base.categories.analytics = base.categories.marketing = false; }
+    return base;
+  }
+  function saveConsent(c){
+    c.updatedAt = nowISO();
+    localStorage.setItem(consentKey, JSON.stringify(c));
+    renderConsent();
+  }
+
+  let consent = loadConsent();
+
+  /* ---------------------- Category Actions ---------------------- */
+  const catalog = [
+    { name:'site_session', cat:'necessary', desc:'Session identifier for cart/checkout', days:1 },
+    { name:'pref_lang',   cat:'prefs',     desc:'Preferred language', days:365 },
+    { name:'pref_theme',  cat:'prefs',     desc:'Dark/light theme', days:365 },
+    { name:'ga_client',   cat:'analytics', desc:'Analytics client ID (simulated)', days:400 },
+    { name:'mkt_uid',     cat:'marketing', desc:'Advertising ID (simulated)', days:390 }
+  ];
+
+  function applyCategoryWrites(){
+    // Necessary always allowed: set a short session cookie
+    setCookie('site_session', crypto.randomUUID ? crypto.randomUUID() : 'sess-'+Date.now(), {days:1});
+
+    if(consent.categories.prefs){
+      setCookie('pref_lang','en',{days:365});
+      setCookie('pref_theme','dark',{days:365});
+      localStorage.setItem('ui.theme','dark');
+    }
+    if(consent.categories.analytics){
+      setCookie('ga_client', (localStorage.getItem('ga.cid')||('GA1.'+Math.random().toString(36).slice(2))), {days:400});
+      localStorage.setItem('ga.cid', (localStorage.getItem('ga.cid')||Math.random().toString(36).slice(2)));
+    }
+    if(consent.categories.marketing && !consent.cpra.doNotSell){
+      setCookie('mkt_uid', localStorage.getItem('mkt.uid') || ('mkt-'+Math.random().toString(36).slice(2)), {days:390});
+      localStorage.setItem('mkt.uid', localStorage.getItem('mkt.uid') || ('mkt-'+Math.random().toString(36).slice(2)));
+    }
+  }
+
+  function removeByCategory(cat){
+    catalog.filter(c=>c.cat===cat).forEach(c=>delCookie(c.name));
+    if(cat==='prefs'){ localStorage.removeItem('ui.theme'); }
+    if(cat==='analytics'){ localStorage.removeItem('ga.cid'); }
+    if(cat==='marketing'){ localStorage.removeItem('mkt.uid'); }
+  }
+
+  /* --------------------- Demo Content Logic --------------------- */
+  function initVisitor(){
+    let v = localStorage.getItem('visitor.id');
+    if(!v){ v = 'v-'+Math.random().toString(36).slice(2); localStorage.setItem('visitor.id', v); }
+    $('#visitorId').textContent = v;
+  }
+  function updateCartView(){ $('#cart').textContent = sessionStorage.getItem('cart') || '[]'; }
+  function updatePrefsView(){ $('#prefs').textContent = JSON.stringify({ theme: localStorage.getItem('ui.theme')||'system' }); }
+
+  $('#addToCart').addEventListener('click', ()=>{
+    const cart = JSON.parse(sessionStorage.getItem('cart')||'[]');
+    cart.push({ sku:'SKU'+Math.floor(Math.random()*1000), qty:1, price: (10+Math.floor(Math.random()*90)) });
+    sessionStorage.setItem('cart', JSON.stringify(cart));
+    updateCartView();
+  });
+  $('#savePrefs').addEventListener('click', ()=>{
+    if(!consent.categories.prefs){ alert('Prefs category is OFF. Enable it in Consent Center.'); return; }
+    localStorage.setItem('ui.theme','dark');
+    setCookie('pref_theme','dark',{days:365});
+    updatePrefsView();
+  });
+  $('#simulatePurchase').addEventListener('click', ()=>{
+    alert('Order placed! (demo)'); sessionStorage.removeItem('cart'); updateCartView();
+  });
+
+  // Non-essential writes gated by consent
+  $('#fireAnalytics').addEventListener('click', ()=>{
+    if(!consent.categories.analytics) return alert('Analytics is OFF. Enable in Consent Center.');
+    console.log('[analytics] page_view', {ts:Date.now(), path:location.pathname});
+    setCookie('ga_last', String(Date.now()), {days:14});
+    renderTables();
+  });
+  $('#setMktCookie').addEventListener('click', ()=>{
+    if(!consent.categories.marketing || consent.cpra.doNotSell) return alert('Marketing is OFF or user opted out of sale/share.');
+    setCookie('mkt_uid', localStorage.getItem('mkt.uid')||('mkt-'+Math.random().toString(36).slice(2)), {days:390});
+    renderTables();
+  });
+  $('#loadAdPixel').addEventListener('click', ()=>{
+    if(!consent.categories.marketing || consent.cpra.doNotSell) return alert('Marketing is OFF or user opted out of sale/share.');
+    // Simulate a marketing pixel request (no third-party tracking in this demo)
+    const img = new Image(); img.alt='ad pixel'; img.width=1; img.height=1; img.referrerPolicy='no-referrer';
+    img.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACw='; // tiny gif
+    document.body.appendChild(img);
+    alert('Simulated ad pixel loaded (no external call).');
+  });
+
+  /* ----------------------- Tables / UI ----------------------- */
+  function renderTables(){
+    const tbody = $('#cookieTable tbody');
+    tbody.innerHTML = '';
+    const catsByName = Object.fromEntries(catalog.map(c=>[c.name,c.cat]));
+    getCookies().forEach(c=>{
+      const tr = document.createElement('tr');
+      const cat = catsByName[c.name] || 'unknown';
+      tr.innerHTML = `<td><code>${c.name}</code></td><td><code>${c.value}</code></td><td>${cat}</td><td>${location.hostname}</td><td class="muted">(see browser devtools)</td>`;
+      tbody.appendChild(tr);
+    });
+
+    const tbody2 = $('#storageTable tbody');
+    tbody2.innerHTML = '';
+    for(let i=0;i<localStorage.length;i++){
+      const k = localStorage.key(i); const v = localStorage.getItem(k);
+      const tr = document.createElement('tr'); tr.innerHTML = `<td>localStorage</td><td><code>${k}</code></td><td><code>${v}</code></td>`; tbody2.appendChild(tr);
+    }
+    for(let i=0;i<sessionStorage.length;i++){
+      const k = sessionStorage.key(i); const v = sessionStorage.getItem(k);
+      const tr = document.createElement('tr'); tr.innerHTML = `<td>sessionStorage</td><td><code>${k}</code></td><td><code>${v}</code></td>`; tbody2.appendChild(tr);
+    }
+  }
+
+  function syncSwitches(){
+    $('#cPrefs').checked = !!consent.categories.prefs;
+    $('#cAnalytics').checked = !!consent.categories.analytics;
+    $('#cMarketing').checked = !!consent.categories.marketing && !consent.cpra.doNotSell;
+  }
+  function renderConsent(){
+    $('#consentUpdated').textContent = consent.updatedAt || '—';
+    $('#consentVersion').textContent = consent.version;
+    $('#region').textContent = consent.region || 'Unknown';
+    $('#consentJSON').textContent = JSON.stringify(consent, null, 2);
+    syncSwitches();
+  }
+
+  function showBannerIfNeeded(){
+    const firstRun = !localStorage.getItem(consentKey);
+    $('#banner').hidden = !firstRun;
+  }
+
+  // Buttons
+  $('#acceptAll').addEventListener('click', ()=>{ consent.categories = {necessary:true,prefs:true,analytics:true,marketing:true}; consent.cpra.doNotSell=false; saveConsent(consent); applyCategoryWrites(); renderTables(); });
+  $('#rejectAll').addEventListener('click', ()=>{ consent.categories = {necessary:true,prefs:false,analytics:false,marketing:false}; saveConsent(consent); removeByCategory('prefs'); removeByCategory('analytics'); removeByCategory('marketing'); renderTables(); });
+  $('#saveChoices').addEventListener('click', ()=>{
+    consent.categories.prefs = $('#cPrefs').checked;
+    consent.categories.analytics = $('#cAnalytics').checked;
+    consent.categories.marketing = $('#cMarketing').checked && !consent.cpra.doNotSell;
+    saveConsent(consent);
+    // Remove categories that are now off
+    if(!consent.categories.prefs) removeByCategory('prefs');
+    if(!consent.categories.analytics) removeByCategory('analytics');
+    if(!consent.categories.marketing) removeByCategory('marketing');
+    applyCategoryWrites();
+    renderTables();
+  });
+
+  $('#bannerAccept').addEventListener('click', ()=>{ $('#acceptAll').click(); $('#banner').hidden=true; });
+  $('#bannerReject').addEventListener('click', ()=>{ $('#rejectAll').click(); $('#banner').hidden=true; });
+  $('#openCenter').addEventListener('click', (e)=>{ e.preventDefault(); window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'}); });
+
+  $('#dnsmpi').addEventListener('click', ()=>{
+    consent.cpra.doNotSell = true; // CPRA opt-out
+    consent.categories.marketing = false;
+    saveConsent(consent);
+    removeByCategory('marketing');
+    alert('Opt-out recorded: Do Not Sell/Share is enabled. Marketing disabled.');
+    renderTables();
+  });
+
+  $('#exportConsent').addEventListener('click', ()=> saveFile('consent-record.json', JSON.stringify(consent, null, 2)) );
+  $('#refreshTables').addEventListener('click', renderTables);
+  $('#clearAll').addEventListener('click', ()=>{
+    // clear cookies we know of
+    catalog.forEach(c=>delCookie(c.name)); delCookie('ga_last');
+    // clear storage
+    localStorage.clear(); sessionStorage.clear();
+    // reset consent
+    consent = loadConsent(); saveConsent(consent);
+    renderTables(); initVisitor(); updateCartView(); updatePrefsView(); showBannerIfNeeded();
+  });
+
+  /* ------------------ Initialize on page load ------------------ */
+  initVisitor();
+  updateCartView(); updatePrefsView();
+  $('#gpc').textContent = String(gpc); $('#dnt').textContent = String(dnt);
+  $('#gpcState').textContent = gpc ? 'ON' : 'OFF';
+  $('#dntState').textContent = dnt ? 'ON' : 'OFF';
+  $('#reqState').textContent = (/(EEA|UK|BR|CA)/i.test(region)) ? 'Likely yes (region='+region+')' : 'Depends on context (region='+region+')';
+
+  // If GPC or DNT present, pre-reject non-essential and show banner
+  if(gpc || dnt){ consent.categories.prefs=false; consent.categories.analytics=false; consent.categories.marketing=false; }
+  renderConsent();
+  applyCategoryWrites();
+  renderTables();
+  showBannerIfNeeded();
+})();
+</script>
+</body>
+</html>
